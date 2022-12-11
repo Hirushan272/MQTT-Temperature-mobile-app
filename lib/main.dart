@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 // import 'package:flutter_mqtt/thermometer_widget.dart';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
 
+import 'input_page.dart';
 import 'test1.dart';
 
 void main() => runApp(MyApp());
@@ -10,30 +12,45 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: const InputPage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  final String broker;
+  final int port;
+  final String username;
+  final String password;
+  final String clientId;
+  const MyHomePage(
+      {super.key,
+      required this.broker,
+      required this.port,
+      required this.username,
+      required this.password,
+      required this.clientId});
 
-  @override
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String broker = 'postman.cloudmqtt.com';
-  int port = 13370;
-  String username = 'fcg.._seu_user_no_brokerrix';
-  String passwd = '0qVi...seu_pass_no_nroker';
-  String clientIdentifier = 'android';
+  late String broker;
+  //  'postman.cloudmqtt.com';
+  late int port;
+  // 13370;
+  late String username;
+  // = 'fcg.._seu_user_no_brokerrix';
+  late String passwd;
+  // = '0qVi...seu_pass_no_nroker';
+  late String clientIdentifier;
+  //  = 'android';
 
   mqtt.MqttClient? client;
   mqtt.MqttConnectionState? connectionState;
@@ -47,6 +64,16 @@ class _MyHomePageState extends State<MyHomePage> {
       print('[MQTT client] Subscribing to ${topic.trim()}');
       client!.subscribe(topic, mqtt.MqttQos.exactlyOnce);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    broker = widget.broker;
+    port = widget.port;
+    username = widget.username;
+    passwd = widget.password;
+    clientIdentifier = widget.clientId;
   }
 
   @override
@@ -109,8 +136,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final mqtt.MqttConnectMessage connMess = mqtt.MqttConnectMessage()
         .withClientIdentifier(clientIdentifier)
         .startClean() // Non persistent session for testing
-        .keepAliveFor(30)
         .withWillQos(mqtt.MqttQos.atMostOnce);
+
     print('[MQTT client] MQTT client connecting....');
     client?.connectionMessage = connMess;
 
